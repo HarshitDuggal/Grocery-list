@@ -10,6 +10,18 @@ function App() {
   const [alert, setalert] = useState({show:false , msg: '' , type: ''})
   const handleSubmit = (e) => {
     e.preventDefault()
+    if(!name){
+      //display alert
+    }
+    else if(name && isEditing){
+      //deal with edit
+    }
+    else{
+      //alert
+      const newItems = {id: new Date().getTime().toString() , title : name }
+      setList([...list,newItems])
+      setName('')
+    }
   }
   return <section className='section-center'>
     <div className='grocery-container'>
@@ -23,8 +35,12 @@ function App() {
           </button>
         </div>
       </form>
-      <List/>
+      {list.length>0 && 
+      <div className='grocery-conntainer'>
+      <List items={list}/>
       <button className='clear-btn'>Clear items</button>
+      </div>
+      }
     </div>
   </section>
 }
