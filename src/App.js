@@ -2,8 +2,18 @@ import React, { useState, useEffect } from 'react'
 import List from './List'
 import Alert from './Alert'
 
+const getLocalstorage = () => {
+  let list = localStorage.getItem('list')
+  if(list){
+    return JSON.parse(localStorage.getItem('list'))
+  }
+  else{
+    return []
+  }
+}
+
 function App() {
-  const [list, setList] = useState([]);
+  const [list, setList] = useState(getLocalstorage());
   const [name,setName] = useState('')
   const [isEditing, setisEditing] = useState(false);
   const [editID, seteditID] = useState(null);
@@ -17,7 +27,18 @@ function App() {
       showAlert(true ,'danger','Please Enter An Item' )
     }
     else if(name && isEditing){
-      //deal with edit
+      setList(
+        list.map((item)=> {
+          if(item.id === editID){
+            return {...item,title:name}
+          }
+          return item
+        })
+      )
+      setisEditing(false)
+      seteditID(null)
+      setName('')
+      showAlert(true,'success','item edited')
     }
     else{
       showAlert(true,'success','item added')
@@ -33,6 +54,18 @@ function App() {
     showAlert(true,'danger','Item Deleted')
     setList(list.filter((item)=> item.id != id ))
   }
+  const editItems = (id) => {
+    const specificitem = list.find((item)=> item.id == id);
+    setisEditing(true)
+    seteditID(id)
+    setName(specificitem.title)
+  }
+  useEffect(() => {
+    localStorage.setItem('list',JSON.stringify(list))
+    // return () => {
+    //   cleanup
+    // };
+  }, [list]);
   return <section className='section-center'>
     <div className='grocery-container'>
       <form onSubmit={handleSubmit} className='grocery-form'>
@@ -47,7 +80,7 @@ function App() {
       </form>
       {list.length>0 && 
       <div className='grocery-conntainer'>
-      <List items={list} removeItem={removeItem}/>
+      <List items={list} removeItem={removeItem} editItems={editItems}/>
       <button className='clear-btn' onClick={() => {
         showAlert(true,'danger' , 'All Items Cleared')
         setList([])}}>Clear items</button>
